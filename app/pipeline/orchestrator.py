@@ -1,0 +1,125 @@
+"""Pipeline orchestrator — runs the full analysis pipeline."""
+
+import logging
+from datetime import datetime, timezone
+
+from app.models.request import AnalysisRequest, AnalysisMode, TIMEFRAME_PRESETS
+from app.models.response import (
+    AnalysisResponse,
+    AnalysisDetails,
+    IndicatorData,
+    SMCData,
+)
+from app.pipeline.data_fetcher import fetch_all_timeframes
+from app.pipeline.pattern_analyzer import analyze_patterns
+from app.pipeline.indicator_calc import calculate_all_timeframes
+from app.pipeline.smc_analyzer import analyze_smc_all_timeframes
+from app.pipeline.llm_synthesizer import synthesize_analysis
+
+logger = logging.getLogger(__name__)
+
+
+async def analyze(request: AnalysisRequest) -> AnalysisResponse:
+    """Run the full analysis pipeline.
+
+    Steps:
+        1. Fetch candle data for all timeframes
+        2. Detect candlestick patterns
+        3. Calculate technical indicators
+        4. Run SMC analysis
+        5. Synthesize with LLM (fallback: return raw data)
+
+    Args:
+        request: The analysis request with symbol, market, mode.
+
+    Returns:
+        AnalysisResponse with trading advice and raw details.
+    """
+    timeframes = TIMEFRAME_PRESETS[request.mode]
+
+    # Step 1: Fetch candle data
+    logger.info(
+        "Fetching candles for %s (%s) — mode: %s",
+        request.symbol, request.market.value, request.mode.value,
+    )
+    candles = await fetch_all_timeframes(
+        request.symbol, request.market, request.mode
+    )
+
+    # Step 2: Detect candlestick patterns
+    logger.info("Detecting candlestick patterns...")
+    patterns = analyze_patterns(candles)
+
+    # Flatten patterns across timeframes for response
+    all_patterns = []
+    for tf_patterns in patterns.values():
+        all_patterns.extend(tf_patterns)
+    all_patterns = list(set(all_patterns))
+
+    # Step 3: Calculate technical indicators
+    logger.info("Calculating technical indicators...")
+    indicators_by_tf = calculate_all_timeframes(candles)
+
+    # Use the highest timeframe indicators as the primary display values
+    primary_tf = timeframes[-1]  # e.g. "15m" for scalping, "4h" for swing
+    primary_indicators = indicators_by_tf.get(primary_tf, IndicatorData())
+
+    # Step 4: SMC analysis
+    logger.info("Running SMC analysis...")
+    smc_by_tf = analyze_smc_all_timeframes(candles)
+
+    # Merge SMC data across timeframes
+    merged_smc = _merge_smc(smc_by_tf)
+
+    # Step 5: LLM synthesis
+    logger.info("Synthesizing analysis with LLM...")
+    trading_analysis = await synthesize_analysis(
+        symbol=request.symbol,
+        market=request.market.value,
+        mode=request.mode.value,
+        timeframes=timeframes,
+        patterns=patterns,
+        indicators=indicators_by_tf,
+        smc_data=smc_by_tf,
+    )
+
+    if trading_analysis is None:
+        logger.warning("LLM synthesis failed — returning raw data only")
+
+    # Build response
+    return AnalysisResponse(
+        symbol=request.symbol,
+        market=request.market.value,
+        mode=request.mode.value,
+        timestamp=datetime.now(timezone.utc),
+        analysis=trading_analysis,
+        details=AnalysisDetails(
+            patterns_detected=all_patterns,
+            indicators=primary_indicators,
+            smc=merged_smc,
+            timeframes_analyzed=timeframes,
+        ),
+    )
+
+
+def _merge_smc(smc_by_tf: dict[str, SMCData]) -> SMCData:
+    """Merge SMC data from all timeframes into a single SMCData."""
+    all_order_blocks = []
+    all_fvgs = []
+    all_sweeps = []
+    structure = None
+
+    for tf, smc in smc_by_tf.items():
+        all_order_blocks.extend(smc.order_blocks)
+        all_fvgs.extend(smc.fair_value_gaps)
+        all_sweeps.extend(smc.liquidity_sweeps)
+        # Use highest timeframe's structure as primary
+        if smc.structure:
+            structure = smc.structure
+
+    return SMCData(
+        order_blocks=all_order_blocks,
+        fair_value_gaps=all_fvgs,
+        structure=structure,
+        liquidity_sweeps=all_sweeps,
+    )
