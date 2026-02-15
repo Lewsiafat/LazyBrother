@@ -24,12 +24,14 @@ logger = logging.getLogger(__name__)
 def get_llm_provider() -> LLMProvider:
     """Factory: return the configured LLM provider."""
     provider = settings.llm_provider.lower()
+    model = settings.llm_model or None  # None means use provider default
+
     if provider == "openai":
-        return OpenAIProvider()
+        return OpenAIProvider(model=model or "gpt-4o")
     elif provider == "gemini":
-        return GeminiProvider()
+        return GeminiProvider(model=model or "gemini-2.0-flash")
     elif provider == "claude":
-        return ClaudeProvider()
+        return ClaudeProvider(model=model or "claude-sonnet-4-20250514")
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 

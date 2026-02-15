@@ -31,6 +31,10 @@ app/
 ├── pipeline/            # Analysis pipeline stages + orchestrator
 ├── providers/           # LLM provider implementations (abstract base + 3 providers)
 └── routers/             # API endpoint definitions
+frontend/                # Vue 3 + Vite debug client
+├── src/components/      # AnalysisForm, ResultPanel, RawJson, ErrorDisplay
+├── src/api.js           # API client (fetch-based)
+└── src/style.css        # Dark theme with glassmorphism
 ```
 
 ### Pipeline Modules (`app/pipeline/`)
@@ -65,9 +69,12 @@ All implement `LLMProvider.synthesize(prompt) -> str`. Provider selected via `LL
 ## Running
 
 ```bash
-uv sync                              # install deps
+uv sync                              # install backend deps
 cp .env.example .env                  # configure
-uv run uvicorn app.main:app --reload  # start
+uv run uvicorn app.main:app --reload  # start backend
+
+# Debug frontend (optional)
+cd frontend && npm install && npm run dev
 ```
 
 ## Configuration

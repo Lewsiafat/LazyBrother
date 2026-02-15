@@ -12,13 +12,14 @@
 - 🤖 **LLM Synthesis** — AI-powered analysis combining all signals into actionable trading advice
 - 🔀 **Multi-Timeframe** — Scalping (1m/5m/15m) and Swing (15m/1h/4h) modes
 - 🔌 **Multi-Provider** — OpenAI, Google Gemini, or Anthropic Claude
+- 🖥️ **Debug Frontend** — Vue 3 visual client for testing the API with structured result cards
 
 ## Quick Start
 
 ### 1. Install dependencies
 
 ```bash
-pip install -e .
+uv sync
 ```
 
 ### 2. Configure
@@ -28,13 +29,23 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-### 3. Run
+### 3. Run the backend
 
 ```bash
-uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload
 ```
 
-### 4. Try it
+### 4. Run the debug frontend (optional)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 for the visual debug client.
+
+### 5. Try via curl
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/analyze \

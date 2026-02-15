@@ -15,6 +15,10 @@ class Settings(BaseSettings):
         default="openai",
         description="LLM provider to use: 'openai', 'gemini', or 'claude'",
     )
+    llm_model: str = Field(
+        default="",
+        description="Specific model version, e.g. 'gpt-4o', 'gemini-2.5-pro', 'claude-sonnet-4-20250514'. Leave empty for provider default.",
+    )
 
     # LLM API Keys
     openai_api_key: str = Field(default="", description="OpenAI API key")
