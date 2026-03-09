@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { analyzeSymbol, healthCheck } from '../api.js'
+import { analyzeSymbol, healthCheck, getBackendPort, setBackendPort } from '../api.js'
 
-const emit = defineEmits(['result', 'error', 'loading'])
+const emit = defineEmits(['result', 'error', 'loading', 'port-updated'])
 
 const symbol = ref('BTCUSDT')
 const market = ref('crypto')
 const mode = ref('scalping')
 const loading = ref(false)
 const backendOk = ref(null)
+const backendPort = ref(getBackendPort())
 
 let healthInterval = null
 
@@ -24,6 +25,15 @@ const quickPicks = [
 function applyQuickPick(pick) {
   symbol.value = pick.symbol
   market.value = pick.market
+}
+
+function onPortChange() {
+  const port = backendPort.value.toString().trim()
+  if (!port || isNaN(port)) return
+  setBackendPort(port)
+  emit('port-updated')
+  backendOk.value = null
+  checkHealth()
 }
 
 async function checkHealth() {
@@ -80,6 +90,22 @@ onUnmounted(() => {
           {{ backendOk === true ? 'Backend online' : backendOk === false ? 'Backend offline' : 'Checking…' }}
         </span>
       </div>
+    </div>
+
+    <!-- Backend Port -->
+    <div class="port-row">
+      <label class="field-label" for="backend-port">Backend Port</label>
+      <input
+        id="backend-port"
+        v-model="backendPort"
+        class="input input--port"
+        type="number"
+        min="1"
+        max="65535"
+        placeholder="8000"
+        @change="onPortChange"
+        @blur="onPortChange"
+      />
     </div>
 
     <!-- Quick picks -->
@@ -143,6 +169,32 @@ onUnmounted(() => {
 <style scoped>
 .form-container {
   width: 100%;
+}
+
+/* Backend Port row */
+.port-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary, rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.port-row .field-label {
+  margin-bottom: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.input--port {
+  width: 90px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 6px 10px;
 }
 
 .form-header {
