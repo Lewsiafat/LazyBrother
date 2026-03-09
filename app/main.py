@@ -22,7 +22,7 @@ app = FastAPI(
         "Candlestick chart analysis service providing structured "
         "investment advice for cryptocurrency and stocks."
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 # CORS — allow all origins for development

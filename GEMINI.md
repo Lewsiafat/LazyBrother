@@ -6,7 +6,7 @@
 
 **LazyBrother** 透過分析加密貨幣與股票的 K 線圖 (Candlestick charts)，結合傳統型態識別、技術指標、聰明錢概念 (Smart Money Concepts, SMC)，並利用 LLM 產生結構化的投資建議。
 
-**目前版本**：`v0.2.0`
+**目前版本**：`v0.3.0`
 
 ### 核心功能
 
@@ -14,6 +14,7 @@
 - 📊 **技術指標**：RSI(14)、MACD(12,26,9)、布林通道 Bollinger(20,2)、SMA(20)、EMA(50)（透過 `pandas-ta`）
 - 🧠 **聰明錢概念 (SMC)**：訂單塊 (Order Blocks)、公平價值缺口 (FVG)、BOS/CHoCH、流動性掠奪 (Liquidity Sweeps)（基於 swing point 分析）
 - 🤖 **LLM 綜合分析**：支援 OpenAI (`gpt-4o`)、Google Gemini (`gemini-2.0-flash`)、Anthropic Claude (`claude-sonnet-4-20250514`)，將各項數據轉化為結構化 JSON 交易建議
+- 🎛️ **自訂 Prompt**：提供 Prompt 管理介面與 API，支援從前端即時附加指定指令或匯入 Markdown。
 - 🔀 **多時間框架**：Scalping (1m/5m/15m)、Swing (15m/1h/4h)，以最高時間框架指標作為主要顯示值
 
 ## 🛠️ 技術棧
@@ -63,8 +64,11 @@ LazyBrother/
 │   ├── main.py              # FastAPI 入口，CORS、Router 註冊
 │   ├── config.py            # pydantic-settings 設定（單例 Settings）
 │   ├── models/
-│   │   ├── request.py       # AnalysisRequest, MarketType, AnalysisMode, TIMEFRAME_PRESETS
-│   │   └── response.py      # AnalysisResponse, TradingAnalysis, IndicatorData, SMCData 等
+│   │   ├── request.py       # AnalysisRequest
+│   │   ├── response.py      # AnalysisResponse, TradingAnalysis, 等
+│   │   └── prompt.py        # PromptSnippet
+│   ├── storage/
+│   │   └── prompt_store.py  # JSON 持久化 CRUD
 │   ├── pipeline/
 │   │   ├── data_fetcher.py  # BaseFetcher ABC, BinanceFetcher, YFinanceFetcher, get_fetcher()
 │   │   ├── pattern_analyzer.py # 12+ K 線型態（單/雙/三蠟燭）
@@ -78,13 +82,15 @@ LazyBrother/
 │   │   ├── gemini_provider.py
 │   │   └── claude_provider.py
 │   └── routers/
-│       └── analysis.py      # POST /api/v1/analyze, GET /api/v1/health
+│       ├── analysis.py      # POST /api/v1/analyze, GET /api/v1/health
+│       └── prompts.py       # Prompt CRUD
 ├── frontend/                # Vue 3 + Vite 偵錯前端
 │   └── src/
 │       ├── App.vue
 │       ├── api.js           # fetch-based API 客戶端
 │       ├── style.css        # 深色主題 + glassmorphism
-│       └── components/
+│       └── components/      # 各項 UI 元件 (含 PromptManager)
+├── data/                    # JSON 資料儲存區
 ├── docs/                    # 規格與計畫文件
 ├── .agent/                  # AI Skills 與腳本工具
 ├── pyproject.toml           # 專案設定與依賴（使用 uv）
@@ -110,8 +116,9 @@ LazyBrother/
 
 | 方法 | 路徑 | 說明 |
 |---|---|---|
-| `POST` | `/api/v1/analyze` | 主分析端點（`symbol`, `market`, `mode`） |
+| `POST` | `/api/v1/analyze` | 主分析端點（`symbol`, `market`, `mode`, `custom_prompt` 等） |
 | `GET` | `/api/v1/health` | 健康檢查 |
+| `REST` | `/api/v1/prompts` | Prompt CRUD 操作 (包含檔案上傳匯入) |
 | `GET` | `/` | 服務資訊 |
 | `GET` | `/docs` | Swagger 自動文件 |
 

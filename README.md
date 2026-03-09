@@ -2,7 +2,7 @@
 
 > Your lazy brother who still gives you solid trading advice.
 
-**LazyBrother** is a backend service that analyzes candlestick charts for **cryptocurrency** and **stocks**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
+**LazyBrother** (`v0.3.0`) is a backend service that analyzes candlestick charts for **cryptocurrency** and **stocks**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
 
 ## Features
 
@@ -10,6 +10,7 @@
 - 📊 **Technical Indicators** — RSI, MACD, Bollinger Bands, SMA, EMA
 - 🧠 **Smart Money Concepts** — Order Blocks, Fair Value Gaps, BOS/CHoCH, Liquidity Sweeps
 - 🤖 **LLM Synthesis** — AI-powered analysis combining all signals into actionable trading advice
+- 🎛️ **Custom Prompts** — Inject your own custom instructions or strategies into the LLM pipeline
 - 🔀 **Multi-Timeframe** — Scalping (1m/5m/15m) and Swing (15m/1h/4h) modes
 - 🔌 **Multi-Provider** — OpenAI, Google Gemini, or Anthropic Claude
 - 🖥️ **Debug Frontend** — Vue 3 visual client for testing the API with structured result cards
@@ -64,6 +65,8 @@ API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 | `symbol` | string | Trading symbol (e.g. `BTCUSDT`, `AAPL`) |
 | `market` | string | `crypto` or `stock` |
 | `mode` | string | `scalping` (1m/5m/15m) or `swing` (15m/1h/4h) |
+| `custom_prompt` | string | Optional inline prompt / instructions |
+| `prompt_ids` | list | Optional saved prompt IDs to include |
 
 **Response** includes:
 - **Trading Thesis** — core reason for the recommendation
@@ -77,6 +80,10 @@ API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 ### `GET /api/v1/health`
 
 Returns service health status.
+
+### `GET / POST / PUT / DELETE /api/v1/prompts`
+
+CRUD endpoints for managing saved custom prompt snippets. Support importing `.md` files.
 
 ## Configuration
 

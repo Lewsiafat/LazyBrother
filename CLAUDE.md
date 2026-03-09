@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**LazyBrother** (`v0.2.0`) is a Python/FastAPI backend service that analyzes candlestick charts for cryptocurrency and stocks. It combines classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
+**LazyBrother** (`v0.3.0`) is a Python/FastAPI backend service that analyzes candlestick charts for cryptocurrency and stocks. It combines classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
 
 ## Tech Stack
 
@@ -33,11 +33,13 @@ All steps are orchestrated by `orchestrator.analyze()`. Primary timeframe = the 
 
 ```
 app/
-├── main.py              # FastAPI entry point, CORS, router registration (version 0.2.0)
+├── main.py              # FastAPI entry point, CORS, router registration (version 0.3.0)
 ├── config.py            # pydantic-settings from .env (Settings singleton)
 ├── models/
-│   ├── request.py       # MarketType, AnalysisMode, TIMEFRAME_PRESETS, AnalysisRequest
-│   └── response.py      # AnalysisResponse, TradingAnalysis, IndicatorData, SMCData, etc.
+│   ├── request.py       # MarketType, AnalysisMode, TIMEFRAME_PRESETS, AnalysisRequest (with custom prompts)
+│   ├── response.py      # AnalysisResponse, TradingAnalysis, IndicatorData, SMCData, etc.
+│   └── prompt.py        # PromptSnippet CRUD models
+├── storage/             # prompt_store.py (JSON persistence)
 ├── pipeline/
 │   ├── data_fetcher.py  # BaseFetcher ABC + BinanceFetcher + YFinanceFetcher + get_fetcher()
 │   ├── pattern_analyzer.py  # Single/dual/triple candle patterns → analyze_patterns()
@@ -51,12 +53,13 @@ app/
 │   ├── gemini_provider.py   # default: gemini-2.0-flash
 │   └── claude_provider.py   # default: claude-sonnet-4-20250514
 └── routers/
-    └── analysis.py      # POST /api/v1/analyze  +  GET /api/v1/health
+    ├── analysis.py      # POST /api/v1/analyze  +  GET /api/v1/health
+    └── prompts.py       # CRUD operations and markdown import
 frontend/                # Vue 3 + Vite debug client
 ├── src/App.vue
 ├── src/api.js           # fetch-based API client
 ├── src/style.css        # dark theme with glassmorphism
-└── src/components/      # AnalysisForm, ResultPanel, RawJson, ErrorDisplay
+└── src/components/      # AnalysisForm, ResultPanel, RawJson, ErrorDisplay, PromptManager
 ```
 
 ### Pipeline Modules (`app/pipeline/`)
@@ -103,8 +106,9 @@ AnalysisResponse
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/v1/analyze` | Main analysis (`symbol`, `market`, `mode`) |
+| `POST` | `/api/v1/analyze` | Main analysis (`symbol`, `market`, `mode`, `custom_prompt`, `prompt_ids`) |
 | `GET` | `/api/v1/health` | Health check |
+| `*` | `/api/v1/prompts` | Prompt snippet CRUD & markdown file import |
 | `GET` | `/` | Service info |
 | `GET` | `/docs` | Auto-generated Swagger docs |
 

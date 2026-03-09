@@ -57,7 +57,7 @@ function onError(err) {
           <h1 class="header-title">LazyBrother</h1>
           <span class="header-tag">Debug Client</span>
         </div>
-        <span class="header-version">v0.1.0</span>
+        <span class="header-version">v0.3.0</span>
       </div>
     </header>
 
