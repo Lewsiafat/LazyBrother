@@ -44,6 +44,7 @@ def _build_prompt(
     patterns: dict[str, list[str]],
     indicators: dict[str, IndicatorData],
     smc_data: dict[str, SMCData],
+    custom_instructions: str | None = None,
 ) -> str:
     """Build the analysis prompt for the LLM."""
 
@@ -103,6 +104,11 @@ Requirements:
 - Take-profit targets should be based on FVGs, resistance/support, and Fibonacci levels
 - Return ONLY the JSON object, no other text
 """
+
+    # Append custom instructions if provided
+    if custom_instructions and custom_instructions.strip():
+        prompt += f"\n\n## Additional Analysis Instructions\n\n{custom_instructions.strip()}\n"
+
     return prompt
 
 
@@ -114,13 +120,15 @@ async def synthesize_analysis(
     patterns: dict[str, list[str]],
     indicators: dict[str, IndicatorData],
     smc_data: dict[str, SMCData],
+    custom_instructions: str | None = None,
 ) -> TradingAnalysis | None:
     """Build prompt, call LLM, parse response into TradingAnalysis.
 
     Returns None if the LLM call fails (caller should return raw data as fallback).
     """
     prompt = _build_prompt(
-        symbol, market, mode, timeframes, patterns, indicators, smc_data
+        symbol, market, mode, timeframes, patterns, indicators, smc_data,
+        custom_instructions=custom_instructions,
     )
 
     try:
