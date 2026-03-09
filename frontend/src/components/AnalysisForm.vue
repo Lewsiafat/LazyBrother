@@ -7,6 +7,9 @@ const emit = defineEmits(['result', 'error', 'loading', 'port-updated'])
 const symbol = ref('BTCUSDT')
 const market = ref('crypto')
 const mode = ref('scalping')
+const customPrompt = ref('')
+const selectedPromptIds = ref([])
+const availablePrompts = ref([])
 const loading = ref(false)
 const backendOk = ref(null)
 const backendPort = ref(getBackendPort())
@@ -56,6 +59,8 @@ async function submit() {
       symbol: symbol.value.trim().toUpperCase(),
       market: market.value,
       mode: mode.value,
+      custom_prompt: customPrompt.value.trim() || undefined,
+      prompt_ids: selectedPromptIds.value.length > 0 ? selectedPromptIds.value : undefined,
     })
     emit('result', result)
   } catch (err) {
@@ -70,6 +75,15 @@ onMounted(() => {
   checkHealth()
   healthInterval = setInterval(checkHealth, 15000)
 })
+
+function setAvailablePrompts(promptsList) {
+  availablePrompts.value = promptsList || []
+  // Clean up selection if some prompts were deleted
+  const validIds = availablePrompts.value.map(p => p.id)
+  selectedPromptIds.value = selectedPromptIds.value.filter(id => validIds.includes(id))
+}
+
+defineExpose({ setAvailablePrompts })
 
 onUnmounted(() => {
   if (healthInterval) clearInterval(healthInterval)
@@ -152,6 +166,36 @@ onUnmounted(() => {
           </select>
         </div>
       </div>
+
+      <!-- Custom Prompt Section -->
+      <details class="custom-prompt-section">
+        <summary class="field-label" style="cursor: pointer; margin-bottom: 0;">
+          📝 Custom Prompt / Instructions (Optional)
+        </summary>
+        
+        <div class="custom-prompt-content">
+          <div class="field" v-if="availablePrompts.length > 0">
+            <label class="field-label">Select Saved Prompts</label>
+            <div class="prompt-checkboxes">
+              <label v-for="p in availablePrompts" :key="p.id" class="checkbox-label">
+                <input type="checkbox" :value="p.id" v-model="selectedPromptIds">
+                {{ p.name }}
+              </label>
+            </div>
+          </div>
+          
+          <div class="field">
+            <label class="field-label" for="custom-prompt-inline">Inline Instructions</label>
+            <textarea
+              id="custom-prompt-inline"
+              v-model="customPrompt"
+              class="input textarea"
+              rows="3"
+              placeholder="e.g. Please use a more conservative trading strategy..."
+            ></textarea>
+          </div>
+        </div>
+      </details>
 
       <button
         type="submit"
@@ -284,6 +328,49 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.custom-prompt-section {
+  background: var(--bg-tertiary, rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.custom-prompt-content {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+}
+
+.textarea {
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.prompt-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
 .btn--full {

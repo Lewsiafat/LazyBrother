@@ -39,3 +39,11 @@ class AnalysisRequest(BaseModel):
         ...,
         description="Analysis mode: 'scalping' (1m/5m/15m) or 'swing' (15m/1h/4h)",
     )
+    custom_prompt: str | None = Field(
+        None,
+        description="Optional custom instructions to append to the LLM prompt",
+    )
+    prompt_ids: list[str] | None = Field(
+        None,
+        description="Optional list of saved prompt snippet IDs to include",
+    )

@@ -28,14 +28,14 @@ export function setBackendPort(port) {
 
 /**
  * Run a trading analysis request.
- * @param {{ symbol: string, market: string, mode: string }} params
+ * @param {{ symbol: string, market: string, mode: string, custom_prompt?: string, prompt_ids?: string[] }} params
  * @returns {Promise<object>}
  */
-export async function analyzeSymbol({ symbol, market, mode }) {
+export async function analyzeSymbol({ symbol, market, mode, custom_prompt, prompt_ids }) {
     const res = await fetch(`${getBaseUrl()}/api/v1/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symbol, market, mode }),
+        body: JSON.stringify({ symbol, market, mode, custom_prompt, prompt_ids }),
     })
 
     if (!res.ok) {
@@ -55,5 +55,59 @@ export async function analyzeSymbol({ symbol, market, mode }) {
 export async function healthCheck() {
     const res = await fetch(`${getBaseUrl()}/api/v1/health`)
     if (!res.ok) throw new Error('Backend unreachable')
+    return res.json()
+}
+
+/**
+ * Prompt Management APIs
+ */
+
+export async function listPrompts() {
+    const res = await fetch(`${getBaseUrl()}/api/v1/prompts`)
+    if (!res.ok) throw new Error('Failed to load prompts')
+    return res.json()
+}
+
+export async function createPrompt(data) {
+    const res = await fetch(`${getBaseUrl()}/api/v1/prompts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    if (!res.ok) throw new Error('Failed to create prompt')
+    return res.json()
+}
+
+export async function updatePrompt(id, data) {
+    const res = await fetch(`${getBaseUrl()}/api/v1/prompts/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    if (!res.ok) throw new Error('Failed to update prompt')
+    return res.json()
+}
+
+export async function deletePrompt(id) {
+    const res = await fetch(`${getBaseUrl()}/api/v1/prompts/${id}`, {
+        method: 'DELETE'
+    })
+    if (!res.ok) throw new Error('Failed to delete prompt')
+    return res.json()
+}
+
+export async function importPromptMarkdown(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch(`${getBaseUrl()}/api/v1/prompts/import`, {
+        method: 'POST',
+        body: formData
+    })
+
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail || 'Failed to import markdown')
+    }
     return res.json()
 }

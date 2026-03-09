@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import AnalysisForm from './components/AnalysisForm.vue'
+import PromptManager from './components/PromptManager.vue'
 import ResultPanel from './components/ResultPanel.vue'
 import RawJson from './components/RawJson.vue'
 import ErrorDisplay from './components/ErrorDisplay.vue'
@@ -11,6 +12,13 @@ const error = ref(null)
 const loading = ref(false)
 const elapsedMs = ref(null)
 const currentPort = ref(getBackendPort())
+const analysisFormRef = ref(null)
+
+function onPromptsUpdated(prompts) {
+  if (analysisFormRef.value) {
+    analysisFormRef.value.setAvailablePrompts(prompts)
+  }
+}
 
 function onPortUpdated() {
   currentPort.value = getBackendPort()
@@ -59,10 +67,15 @@ function onError(err) {
         <!-- Left: Form -->
         <aside class="sidebar">
           <AnalysisForm
+            ref="analysisFormRef"
             @result="onResult"
             @error="onError"
             @loading="onLoading"
             @port-updated="onPortUpdated"
+          />
+          <PromptManager 
+            @prompts-updated="onPromptsUpdated"
+            @error="onError"
           />
           <div v-if="elapsedMs" class="elapsed">
             Completed in {{ (elapsedMs / 1000).toFixed(1) }}s

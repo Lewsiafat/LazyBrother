@@ -15,6 +15,7 @@ from app.pipeline.pattern_analyzer import analyze_patterns
 from app.pipeline.indicator_calc import calculate_all_timeframes
 from app.pipeline.smc_analyzer import analyze_smc_all_timeframes
 from app.pipeline.llm_synthesizer import synthesize_analysis
+from app.storage.prompt_store import get_prompts_by_ids
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,17 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
 
     # Step 5: LLM synthesis
     logger.info("Synthesizing analysis with LLM...")
+
+    # Build custom instructions from saved snippets + inline prompt
+    custom_parts: list[str] = []
+    if request.prompt_ids:
+        snippets = get_prompts_by_ids(request.prompt_ids)
+        for s in snippets:
+            custom_parts.append(f"### {s.name}\n{s.content}")
+    if request.custom_prompt:
+        custom_parts.append(request.custom_prompt)
+    custom_instructions = "\n\n".join(custom_parts) if custom_parts else None
+
     trading_analysis = await synthesize_analysis(
         symbol=request.symbol,
         market=request.market.value,
@@ -81,6 +93,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
         patterns=patterns,
         indicators=indicators_by_tf,
         smc_data=smc_by_tf,
+        custom_instructions=custom_instructions,
     )
 
     if trading_analysis is None:
