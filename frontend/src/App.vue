@@ -1,14 +1,20 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import AnalysisForm from './components/AnalysisForm.vue'
 import ResultPanel from './components/ResultPanel.vue'
 import RawJson from './components/RawJson.vue'
 import ErrorDisplay from './components/ErrorDisplay.vue'
+import { getBackendPort } from './api.js'
 
 const result = ref(null)
 const error = ref(null)
 const loading = ref(false)
 const elapsedMs = ref(null)
+const currentPort = ref(getBackendPort())
+
+function onPortUpdated() {
+  currentPort.value = getBackendPort()
+}
 
 let startTime = 0
 
@@ -56,6 +62,7 @@ function onError(err) {
             @result="onResult"
             @error="onError"
             @loading="onLoading"
+            @port-updated="onPortUpdated"
           />
           <div v-if="elapsedMs" class="elapsed">
             Completed in {{ (elapsedMs / 1000).toFixed(1) }}s
@@ -102,7 +109,7 @@ function onError(err) {
     <footer class="footer">
       <div class="container footer-inner">
         <span>LazyBrother Debug Client</span>
-        <span>Backend: <code>localhost:8000</code></span>
+        <span>Backend: <code>localhost:{{ currentPort }}</code></span>
       </div>
     </footer>
   </div>
