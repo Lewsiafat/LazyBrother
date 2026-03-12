@@ -1,15 +1,14 @@
-"""Data fetcher module — pulls OHLCV candles from Binance and yFinance."""
+"""Data fetcher module — pulls OHLCV candles from Binance."""
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-
+import logging
 import pandas as pd
-import yfinance as yf
 from binance.client import Client as BinanceClient
 
 from app.config import settings
-from app.models.request import MarketType, AnalysisMode, TIMEFRAME_PRESETS
+from app.models.request import AnalysisMode, TIMEFRAME_PRESETS
 
+logger = logging.getLogger(__name__)
 
 # Binance interval mapping
 BINANCE_INTERVALS = {
@@ -18,15 +17,6 @@ BINANCE_INTERVALS = {
     "15m": BinanceClient.KLINE_INTERVAL_15MINUTE,
     "1h": BinanceClient.KLINE_INTERVAL_1HOUR,
     "4h": BinanceClient.KLINE_INTERVAL_4HOUR,
-}
-
-# yFinance interval mapping
-YFINANCE_INTERVALS = {
-    "1m": "1m",
-    "5m": "5m",
-    "15m": "15m",
-    "1h": "1h",
-    "4h": "1h",  # yfinance doesn't support 4h directly; we'll resample
 }
 
 # How many candles to fetch per timeframe
@@ -62,6 +52,7 @@ class BinanceFetcher(BaseFetcher):
             api_key=settings.binance_api_key,
             api_secret=settings.binance_api_secret,
         )
+        self._cached_symbols: list[str] = []
 
     async def fetch_candles(
         self, symbol: str, interval: str, limit: int = 200
@@ -90,71 +81,38 @@ class BinanceFetcher(BaseFetcher):
 
         return df[["open", "high", "low", "close", "volume"]]
 
+    async def get_all_symbols(self) -> list[str]:
+        """Fetch all available USDT symbols from Binance."""
+        if self._cached_symbols:
+            return self._cached_symbols
 
-class YFinanceFetcher(BaseFetcher):
-    """Fetches stock candle data from Yahoo Finance."""
-
-    async def fetch_candles(
-        self, symbol: str, interval: str, limit: int = 200
-    ) -> pd.DataFrame:
-        yf_interval = YFINANCE_INTERVALS.get(interval)
-        if not yf_interval:
-            raise ValueError(f"Unsupported interval for yFinance: {interval}")
-
-        # Determine period based on interval
-        period_map = {
-            "1m": "1d",
-            "5m": "5d",
-            "15m": "5d",
-            "1h": "1mo",
-            "4h": "3mo",
-        }
-        period = period_map.get(interval, "1mo")
-
-        ticker = yf.Ticker(symbol)
-        df = ticker.history(period=period, interval=yf_interval)
-
-        if df.empty:
-            raise ValueError(f"No data returned for symbol: {symbol}")
-
-        # Normalize column names to lowercase
-        df.columns = [c.lower() for c in df.columns]
-
-        # Resample to 4h if needed
-        if interval == "4h":
-            df = df.resample("4h").agg({
-                "open": "first",
-                "high": "max",
-                "low": "min",
-                "close": "last",
-                "volume": "sum",
-            }).dropna()
-
-        # Keep only last `limit` candles
-        df = df.tail(limit)
-
-        return df[["open", "high", "low", "close", "volume"]]
+        try:
+            info = self.client.get_exchange_info()
+            symbols = [
+                s["symbol"] for s in info["symbols"]
+                if s["status"] == "TRADING" and s["quoteAsset"] == "USDT"
+            ]
+            self._cached_symbols = sorted(symbols)
+            return self._cached_symbols
+        except Exception as e:
+            logger.error("Failed to fetch symbols from Binance: %s", e)
+            return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]
 
 
-def get_fetcher(market: MarketType) -> BaseFetcher:
-    """Factory: return the appropriate fetcher for the market type."""
-    if market == MarketType.CRYPTO:
-        return BinanceFetcher()
-    elif market == MarketType.STOCK:
-        return YFinanceFetcher()
-    else:
-        raise ValueError(f"Unsupported market type: {market}")
+def get_fetcher() -> BinanceFetcher:
+    """Factory: return the Binance fetcher."""
+    return BinanceFetcher()
 
 
 async def fetch_all_timeframes(
-    symbol: str, market: MarketType, mode: AnalysisMode
+    symbol: str, mode: AnalysisMode
 ) -> dict[str, pd.DataFrame]:
     """Fetch candle data for all timeframes in the given mode.
 
     Returns:
         dict mapping timeframe string (e.g. "1m") to its DataFrame.
     """
-    fetcher = get_fetcher(market)
+    fetcher = get_fetcher()
     timeframes = TIMEFRAME_PRESETS[mode]
 
     results: dict[str, pd.DataFrame] = {}

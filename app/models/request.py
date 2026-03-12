@@ -4,12 +4,6 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
-class MarketType(str, Enum):
-    """Supported market types."""
-    CRYPTO = "crypto"
-    STOCK = "stock"
-
-
 class AnalysisMode(str, Enum):
     """Analysis timeframe modes."""
     SCALPING = "scalping"  # 1m, 5m, 15m
@@ -28,12 +22,8 @@ class AnalysisRequest(BaseModel):
 
     symbol: str = Field(
         ...,
-        description="Trading symbol, e.g. 'BTCUSDT' for crypto or 'AAPL' for stocks",
-        examples=["BTCUSDT", "ETHUSDT", "AAPL", "TSLA"],
-    )
-    market: MarketType = Field(
-        ...,
-        description="Market type: 'crypto' or 'stock'",
+        description="Trading symbol, e.g. 'BTCUSDT', 'ETHUSDT'",
+        examples=["BTCUSDT", "ETHUSDT", "SOLUSDT"],
     )
     mode: AnalysisMode = Field(
         ...,

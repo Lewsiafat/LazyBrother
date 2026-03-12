@@ -4,18 +4,19 @@
 
 ## 🎯 專案概覽
 
-**LazyBrother** 透過分析加密貨幣與股票的 K 線圖 (Candlestick charts)，結合傳統型態識別、技術指標、聰明錢概念 (Smart Money Concepts, SMC)，並利用 LLM 產生結構化的投資建議。
+**LazyBrother** 透過分析加密貨幣的 K 線圖 (Candlestick charts)，結合傳統型態識別、技術指標、聰明錢概念 (Smart Money Concepts, SMC)，並利用 LLM 產生結構化的投資建議。
 
-**目前版本**：`v0.3.0`
+**目前版本**：`v0.4.0`
 
 ### 核心功能
 
-- 🕯️ **K 線型態識別**：涵蓋 12+ 種型態，分單蠟燭（Doji、Hammer、Shooting Star 等）、雙蠟燭（Bullish/Bearish Engulfing、Piercing Line、Dark Cloud Cover）、三蠟燭（Morning/Evening Star、Three White Soldiers/Black Crows）
-- 📊 **技術指標**：RSI(14)、MACD(12,26,9)、布林通道 Bollinger(20,2)、SMA(20)、EMA(50)（透過 `pandas-ta`）
-- 🧠 **聰明錢概念 (SMC)**：訂單塊 (Order Blocks)、公平價值缺口 (FVG)、BOS/CHoCH、流動性掠奪 (Liquidity Sweeps)（基於 swing point 分析）
-- 🤖 **LLM 綜合分析**：支援 OpenAI (`gpt-4o`)、Google Gemini (`gemini-2.0-flash`)、Anthropic Claude (`claude-sonnet-4-20250514`)，將各項數據轉化為結構化 JSON 交易建議
-- 🎛️ **自訂 Prompt**：提供 Prompt 管理介面與 API，支援從前端即時附加指定指令或匯入 Markdown。
-- 🔀 **多時間框架**：Scalping (1m/5m/15m)、Swing (15m/1h/4h)，以最高時間框架指標作為主要顯示值
+- 🕯️ **K 線型態識別**：涵蓋 12+ 種型態，分單蠟燭、雙蠟燭、三蠟燭
+- 📊 **技術指標**：RSI(14)、MACD(12,26,9)、布林通道 Bollinger(20,2)、SMA(20)、EMA(50)
+- 🧠 **聰明錢概念 (SMC)**：訂單塊 (Order Blocks)、公平價值缺口 (FVG)、BOS/CHoCH、流動性掠奪 (Liquidity Sweeps)
+- 🤖 **LLM 綜合分析**：支援 OpenAI (`gpt-4o`)、Google Gemini (`gemini-2.0-flash`)、Anthropic Claude (`claude-sonnet-4-20250514`)
+- 🔍 **動態商品選擇**：整合幣安 API 動態獲取所有 USDT 交易對，支援前端即時搜尋與商品持久化
+- 🎛️ **自訂 Prompt**：提供 Prompt 管理介面與 API，支援即時附加指令或匯入 Markdown。
+- 🔀 **多時間框架**：Scalping (1m/5m/15m)、Swing (15m/1h/4h)
 
 ## 🛠️ 技術棧
 
@@ -23,7 +24,7 @@
 |---|---|
 | **後端** | Python ≥3.12, FastAPI, Uvicorn |
 | **資料處理** | pandas, pandas-ta |
-| **資料源** | python-binance（加密）, yfinance（股票）|
+| **資料源** | python-binance（加密貨幣）|
 | **AI 整合** | openai, google-generativeai, anthropic |
 | **設定管理** | pydantic + pydantic-settings |
 | **套件管理** | `uv` |
@@ -61,28 +62,28 @@ npm run dev
 ```
 LazyBrother/
 ├── app/
-│   ├── main.py              # FastAPI 入口，CORS、Router 註冊
-│   ├── config.py            # pydantic-settings 設定（單例 Settings）
+│   ├── main.py              # FastAPI 入口
+│   ├── config.py            # pydantic-settings 設定
 │   ├── models/
-│   │   ├── request.py       # AnalysisRequest
+│   │   ├── request.py       # AnalysisRequest (移除 MarketType)
 │   │   ├── response.py      # AnalysisResponse, TradingAnalysis, 等
 │   │   └── prompt.py        # PromptSnippet
 │   ├── storage/
 │   │   └── prompt_store.py  # JSON 持久化 CRUD
 │   ├── pipeline/
-│   │   ├── data_fetcher.py  # BaseFetcher ABC, BinanceFetcher, YFinanceFetcher, get_fetcher()
-│   │   ├── pattern_analyzer.py # 12+ K 線型態（單/雙/三蠟燭）
-│   │   ├── indicator_calc.py   # RSI, MACD, Bollinger, SMA, EMA
-│   │   ├── smc_analyzer.py     # Order Blocks, FVG, BOS/CHoCH, Liquidity Sweeps
-│   │   ├── llm_synthesizer.py  # Prompt 建構、LLM 呼叫、JSON 解析
-│   │   └── orchestrator.py     # analyze() 主流程，5 步 Pipeline 協調
+│   │   ├── data_fetcher.py  # BaseFetcher, BinanceFetcher (新增 get_all_symbols)
+│   │   ├── pattern_analyzer.py
+│   │   ├── indicator_calc.py
+│   │   ├── smc_analyzer.py
+│   │   ├── llm_synthesizer.py
+│   │   └── orchestrator.py     # analyze() 主流程 (僅限 Crypto)
 │   ├── providers/
-│   │   ├── base.py          # LLMProvider 抽象基底類別
+│   │   ├── base.py
 │   │   ├── openai_provider.py
 │   │   ├── gemini_provider.py
 │   │   └── claude_provider.py
 │   └── routers/
-│       ├── analysis.py      # POST /api/v1/analyze, GET /api/v1/health
+│       ├── analysis.py      # POST /analyze, GET /symbols, GET /health
 │       └── prompts.py       # Prompt CRUD
 ├── frontend/                # Vue 3 + Vite 偵錯前端
 │   └── src/
@@ -108,7 +109,6 @@ LazyBrother/
 | `ANTHROPIC_API_KEY` | Anthropic API Key | - |
 | `BINANCE_API_KEY` | Binance API Key（加密貨幣資料） | - |
 | `BINANCE_API_SECRET` | Binance API Secret | - |
-| `ALPHA_VANTAGE_API_KEY` | Alpha Vantage Key（備用） | - |
 | `HOST` | 伺服器 Host | `0.0.0.0` |
 | `PORT` | 伺服器 Port | `8000` |
 
@@ -116,9 +116,10 @@ LazyBrother/
 
 | 方法 | 路徑 | 說明 |
 |---|---|---|
-| `POST` | `/api/v1/analyze` | 主分析端點（`symbol`, `market`, `mode`, `custom_prompt` 等） |
+| `POST` | `/api/v1/analyze` | 主分析端點（`symbol`, `mode`, `custom_prompt` 等） |
+| `GET` | `/api/v1/symbols` | 獲取可用幣安交易對 |
 | `GET` | `/api/v1/health` | 健康檢查 |
-| `REST` | `/api/v1/prompts` | Prompt CRUD 操作 (包含檔案上傳匯入) |
+| `REST` | `/api/v1/prompts` | Prompt CRUD 操作 |
 | `GET` | `/` | 服務資訊 |
 | `GET` | `/docs` | Swagger 自動文件 |
 
