@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { analyzeSymbol, healthCheck, getBackendPort, setBackendPort } from '../api.js'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { analyzeSymbol, healthCheck, fetchSymbols, getBackendPort, setBackendPort } from '../api.js'
 
 const emit = defineEmits(['result', 'error', 'loading', 'port-updated'])
 
-const symbol = ref('BTCUSDT')
-const market = ref('crypto')
+const SYMBOL_STORAGE_KEY = 'lazybrother_last_symbol'
+
+const symbol = ref(localStorage.getItem(SYMBOL_STORAGE_KEY) || 'BTCUSDT')
 const mode = ref('scalping')
 const customPrompt = ref('')
 const selectedPromptIds = ref([])
@@ -14,21 +15,48 @@ const loading = ref(false)
 const backendOk = ref(null)
 const backendPort = ref(getBackendPort())
 
+// Symbol selection state
+const allSymbols = ref([])
+const symbolSearch = ref('')
+const showDropdown = ref(false)
+const symbolsLoading = ref(false)
+
+const filteredSymbols = computed(() => {
+  const search = symbolSearch.value.trim().toUpperCase()
+  if (!search) return allSymbols.value.slice(0, 50)
+  return allSymbols.value
+    .filter(s => s.includes(search))
+    .slice(0, 50)
+})
+
 let healthInterval = null
 
 const quickPicks = [
-  { label: 'BTC', symbol: 'BTCUSDT', market: 'crypto' },
-  { label: 'ETH', symbol: 'ETHUSDT', market: 'crypto' },
-  { label: 'SOL', symbol: 'SOLUSDT', market: 'crypto' },
-  { label: 'AAPL', symbol: 'AAPL', market: 'stock' },
-  { label: 'TSLA', symbol: 'TSLA', market: 'stock' },
-  { label: 'NVDA', symbol: 'NVDA', market: 'stock' },
+  { label: 'BTC', symbol: 'BTCUSDT' },
+  { label: 'ETH', symbol: 'ETHUSDT' },
+  { label: 'SOL', symbol: 'SOLUSDT' },
+  { label: 'BNB', symbol: 'BNBUSDT' },
+  { label: 'XRP', symbol: 'XRPUSDT' },
 ]
 
 function applyQuickPick(pick) {
   symbol.value = pick.symbol
-  market.value = pick.market
+  symbolSearch.value = ''
+  showDropdown.value = false
 }
+
+function selectSymbol(s) {
+  symbol.value = s
+  symbolSearch.value = ''
+  showDropdown.value = false
+}
+
+// Watch symbol and save to localStorage
+watch(symbol, (newVal) => {
+  if (newVal) {
+    localStorage.setItem(SYMBOL_STORAGE_KEY, newVal)
+  }
+})
 
 function onPortChange() {
   const port = backendPort.value.toString().trim()
@@ -37,6 +65,7 @@ function onPortChange() {
   emit('port-updated')
   backendOk.value = null
   checkHealth()
+  loadSymbols()
 }
 
 async function checkHealth() {
@@ -45,6 +74,19 @@ async function checkHealth() {
     backendOk.value = true
   } catch {
     backendOk.value = false
+  }
+}
+
+async function loadSymbols() {
+  if (symbolsLoading.value) return
+  symbolsLoading.value = true
+  try {
+    const list = await fetchSymbols()
+    allSymbols.value = list
+  } catch (err) {
+    console.error('Failed to load symbols:', err)
+  } finally {
+    symbolsLoading.value = false
   }
 }
 
@@ -57,7 +99,6 @@ async function submit() {
   try {
     const result = await analyzeSymbol({
       symbol: symbol.value.trim().toUpperCase(),
-      market: market.value,
       mode: mode.value,
       custom_prompt: customPrompt.value.trim() || undefined,
       prompt_ids: selectedPromptIds.value.length > 0 ? selectedPromptIds.value : undefined,
@@ -73,6 +114,7 @@ async function submit() {
 
 onMounted(() => {
   checkHealth()
+  loadSymbols()
   healthInterval = setInterval(checkHealth, 15000)
 })
 
@@ -137,34 +179,50 @@ onUnmounted(() => {
 
     <!-- Form fields -->
     <form class="form-fields" @submit.prevent="submit">
-      <div class="field">
+      <div class="field symbol-field">
         <label class="field-label" for="symbol">Symbol</label>
-        <input
-          id="symbol"
-          v-model="symbol"
-          class="input"
-          type="text"
-          placeholder="e.g. BTCUSDT, AAPL"
-          required
-        />
+        <div class="symbol-select-container">
+          <div 
+            class="input symbol-trigger" 
+            @click="showDropdown = !showDropdown"
+          >
+            {{ symbol }}
+            <span class="chevron" :class="{ 'chevron--up': showDropdown }">▼</span>
+          </div>
+
+          <div v-if="showDropdown" class="symbol-dropdown card">
+            <input
+              v-model="symbolSearch"
+              class="input input--search"
+              type="text"
+              placeholder="Search USDT pairs..."
+              autofocus
+              @click.stop
+            />
+            <div class="symbol-list">
+              <div 
+                v-for="s in filteredSymbols" 
+                :key="s"
+                class="symbol-item"
+                :class="{ 'symbol-item--active': s === symbol }"
+                @click="selectSymbol(s)"
+              >
+                {{ s }}
+              </div>
+              <div v-if="filteredSymbols.length === 0" class="symbol-empty">
+                No matching symbols
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label" for="market">Market</label>
-          <select id="market" v-model="market" class="input select">
-            <option value="crypto">Crypto</option>
-            <option value="stock">Stock</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="mode">Mode</label>
-          <select id="mode" v-model="mode" class="input select">
-            <option value="scalping">Scalping (1m/5m/15m)</option>
-            <option value="swing">Swing (15m/1h/4h)</option>
-          </select>
-        </div>
+      <div class="field">
+        <label class="field-label" for="mode">Analysis Mode</label>
+        <select id="mode" v-model="mode" class="input select">
+          <option value="scalping">Scalping (1m/5m/15m)</option>
+          <option value="swing">Swing (15m/1h/4h)</option>
+        </select>
       </div>
 
       <!-- Custom Prompt Section -->
@@ -211,6 +269,84 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* Symbol Select */
+.symbol-field {
+  position: relative;
+}
+
+.symbol-select-container {
+  position: relative;
+}
+
+.symbol-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chevron {
+  font-size: 0.6rem;
+  transition: transform 0.2s;
+  opacity: 0.5;
+}
+
+.chevron--up {
+  transform: rotate(180deg);
+}
+
+.symbol-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input--search {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.symbol-list {
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.symbol-item {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.symbol-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.symbol-item--active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.symbol-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 .form-container {
   width: 100%;
 }

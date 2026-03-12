@@ -31,7 +31,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
         5. Synthesize with LLM (fallback: return raw data)
 
     Args:
-        request: The analysis request with symbol, market, mode.
+        request: The analysis request with symbol, mode.
 
     Returns:
         AnalysisResponse with trading advice and raw details.
@@ -40,11 +40,11 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
 
     # Step 1: Fetch candle data
     logger.info(
-        "Fetching candles for %s (%s) — mode: %s",
-        request.symbol, request.market.value, request.mode.value,
+        "Fetching candles for %s — mode: %s",
+        request.symbol, request.mode.value,
     )
     candles = await fetch_all_timeframes(
-        request.symbol, request.market, request.mode
+        request.symbol, request.mode
     )
 
     # Step 2: Detect candlestick patterns
@@ -87,7 +87,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
 
     trading_analysis = await synthesize_analysis(
         symbol=request.symbol,
-        market=request.market.value,
+        market="crypto",
         mode=request.mode.value,
         timeframes=timeframes,
         patterns=patterns,
@@ -102,7 +102,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
     # Build response
     return AnalysisResponse(
         symbol=request.symbol,
-        market=request.market.value,
+        market="crypto",
         mode=request.mode.value,
         timestamp=datetime.now(timezone.utc),
         analysis=trading_analysis,

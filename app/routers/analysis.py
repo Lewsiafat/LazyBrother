@@ -7,10 +7,23 @@ from fastapi import APIRouter, HTTPException
 from app.models.request import AnalysisRequest
 from app.models.response import AnalysisResponse
 from app.pipeline.orchestrator import analyze
+from app.pipeline.data_fetcher import get_fetcher
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["analysis"])
+
+
+@router.get("/symbols", response_model=list[str])
+async def get_symbols_endpoint() -> list[str]:
+    """Get all available USDT trading symbols from Binance."""
+    try:
+        fetcher = get_fetcher()
+        symbols = await fetcher.get_all_symbols()
+        return symbols
+    except Exception as e:
+        logger.error("Failed to fetch symbols: %s", e)
+        raise HTTPException(status_code=503, detail="Failed to fetch symbols from Binance")
 
 
 @router.post("/analyze", response_model=AnalysisResponse)

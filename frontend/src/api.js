@@ -28,14 +28,14 @@ export function setBackendPort(port) {
 
 /**
  * Run a trading analysis request.
- * @param {{ symbol: string, market: string, mode: string, custom_prompt?: string, prompt_ids?: string[] }} params
+ * @param {{ symbol: string, mode: string, custom_prompt?: string, prompt_ids?: string[] }} params
  * @returns {Promise<object>}
  */
-export async function analyzeSymbol({ symbol, market, mode, custom_prompt, prompt_ids }) {
+export async function analyzeSymbol({ symbol, mode, custom_prompt, prompt_ids }) {
     const res = await fetch(`${getBaseUrl()}/api/v1/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symbol, market, mode, custom_prompt, prompt_ids }),
+        body: JSON.stringify({ symbol, mode, custom_prompt, prompt_ids }),
     })
 
     if (!res.ok) {
@@ -55,6 +55,16 @@ export async function analyzeSymbol({ symbol, market, mode, custom_prompt, promp
 export async function healthCheck() {
     const res = await fetch(`${getBaseUrl()}/api/v1/health`)
     if (!res.ok) throw new Error('Backend unreachable')
+    return res.json()
+}
+
+/**
+ * Fetch available symbols from Binance.
+ * @returns {Promise<string[]>}
+ */
+export async function fetchSymbols() {
+    const res = await fetch(`${getBaseUrl()}/api/v1/symbols`)
+    if (!res.ok) throw new Error('Failed to fetch symbols')
     return res.json()
 }
 
