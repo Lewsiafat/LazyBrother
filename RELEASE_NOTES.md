@@ -1,5 +1,19 @@
 # Release Notes
 
+## [v0.4.0] - 2026-03-12
+
+### Added
+- **Dynamic Symbol Selection** — Backend now fetches available Spot USDT pairs directly from Binance API (`GET /api/v1/symbols`).
+- Frontend features a custom searchable dropdown for symbol selection.
+
+### Changed
+- Refactored `DataFetcher` to use only Binance for crypto data.
+- Frontend persists last selected symbol using `localStorage`.
+- Streamlined `AnalysisRequest` and orchestrator by removing multi-market complexities.
+
+### Removed
+- Dropped `yfinance` dependency and stock market support to focus entirely on cryptocurrency analysis.
+
 ## [v0.2.0] - 2026-02-15
 
 ### Added

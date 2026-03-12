@@ -2,7 +2,7 @@
 
 > Your lazy brother who still gives you solid trading advice.
 
-**LazyBrother** (`v0.3.0`) is a backend service that analyzes candlestick charts for **cryptocurrency** and **stocks**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
+**LazyBrother** (`v0.4.0`) is a backend service that analyzes candlestick charts for **cryptocurrency**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
 
 ## Features
 
@@ -10,6 +10,7 @@
 - 📊 **Technical Indicators** — RSI, MACD, Bollinger Bands, SMA, EMA
 - 🧠 **Smart Money Concepts** — Order Blocks, Fair Value Gaps, BOS/CHoCH, Liquidity Sweeps
 - 🤖 **LLM Synthesis** — AI-powered analysis combining all signals into actionable trading advice
+- 🔍 **Dynamic Symbol Selection** — Integrated with Binance API to fetch available USDT pairs dynamically
 - 🎛️ **Custom Prompts** — Inject your own custom instructions or strategies into the LLM pipeline
 - 🔀 **Multi-Timeframe** — Scalping (1m/5m/15m) and Swing (15m/1h/4h) modes
 - 🔌 **Multi-Provider** — OpenAI, Google Gemini, or Anthropic Claude
@@ -51,7 +52,7 @@ Open http://localhost:5173 for the visual debug client.
 ```bash
 curl -X POST http://localhost:8000/api/v1/analyze \
   -H "Content-Type: application/json" \
-  -d '{"symbol": "BTCUSDT", "market": "crypto", "mode": "scalping"}'
+  -d '{"symbol": "BTCUSDT", "mode": "scalping"}'
 ```
 
 API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -62,8 +63,7 @@ API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `symbol` | string | Trading symbol (e.g. `BTCUSDT`, `AAPL`) |
-| `market` | string | `crypto` or `stock` |
+| `symbol` | string | Trading symbol (e.g. `BTCUSDT`, `ETHUSDT`) |
 | `mode` | string | `scalping` (1m/5m/15m) or `swing` (15m/1h/4h) |
 | `custom_prompt` | string | Optional inline prompt / instructions |
 | `prompt_ids` | list | Optional saved prompt IDs to include |
@@ -76,6 +76,10 @@ API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Stop-Loss** — price with reasoning
 - **Take-Profit Targets** — TP1, TP2, TP3 with reasoning
 - **Raw Details** — patterns, indicators, and SMC data
+
+### `GET /api/v1/symbols`
+
+Returns a list of all available Spot USDT trading pairs from Binance.
 
 ### `GET /api/v1/health`
 
@@ -97,7 +101,6 @@ Set these in your `.env` file:
 | `ANTHROPIC_API_KEY` | Anthropic API key |
 | `BINANCE_API_KEY` | Binance API key |
 | `BINANCE_API_SECRET` | Binance API secret |
-| `ALPHA_VANTAGE_API_KEY` | Alpha Vantage API key |
 
 ## Architecture
 
