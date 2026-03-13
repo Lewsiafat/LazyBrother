@@ -22,7 +22,7 @@ app = FastAPI(
         "Candlestick chart analysis service providing structured "
         "investment advice for cryptocurrency and stocks."
     ),
-    version="0.3.0",
+    version="0.5.0",
 )
 
 # CORS — allow all origins for development
@@ -44,7 +44,7 @@ async def root() -> dict:
     """Root endpoint — service info."""
     return {
         "service": "LazyBrother",
-        "version": "0.1.0",
+        "version": "0.5.0",
         "docs": "/docs",
     }
 

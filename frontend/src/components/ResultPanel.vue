@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
   data: { type: Object, required: true },
@@ -7,6 +7,40 @@ const props = defineProps({
 
 const analysis = computed(() => props.data.analysis)
 const details = computed(() => props.data.details)
+
+const realTimePrice = ref(null)
+let ws = null
+
+function connectWebSocket(symbol) {
+  if (ws) {
+    ws.close()
+  }
+  
+  if (!symbol) return
+  
+  // Binance WS expects lowercase symbol (e.g. btcusdt@ticker)
+  const s = symbol.toLowerCase()
+  ws = new WebSocket(`wss://stream.binance.com:9443/ws/${s}@ticker`)
+  
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    realTimePrice.value = parseFloat(data.c) // 'c' is the last price in @ticker stream
+  }
+  
+  ws.onerror = (err) => {
+    console.error('WebSocket error:', err)
+  }
+}
+
+// Watch for symbol changes to reconnect
+watch(() => props.data.symbol, (newSymbol) => {
+  realTimePrice.value = null
+  connectWebSocket(newSymbol)
+}, { immediate: true })
+
+onUnmounted(() => {
+  if (ws) ws.close()
+})
 
 function fmt(n) {
   if (n == null) return '—'
@@ -18,12 +52,27 @@ function fmt(n) {
   <div class="result">
     <!-- Header meta -->
     <div class="result-meta card">
-      <div class="meta-row">
-        <span class="meta-symbol">{{ data.symbol }}</span>
-        <span class="badge badge--tag">{{ data.market }}</span>
-        <span class="badge badge--tag">{{ data.mode }}</span>
+      <div class="meta-left">
+        <div class="meta-row">
+          <span class="meta-symbol">{{ data.symbol }}</span>
+          <span class="badge badge--tag">{{ data.market }}</span>
+          <span class="badge badge--tag">{{ data.mode }}</span>
+        </div>
+        <div class="meta-time">{{ new Date(data.timestamp).toLocaleString() }}</div>
       </div>
-      <div class="meta-time">{{ new Date(data.timestamp).toLocaleString() }}</div>
+      
+      <div class="meta-prices">
+        <div class="price-item">
+          <span class="price-label">Analysis Price</span>
+          <span class="price-value">{{ fmt(data.current_price) }}</span>
+        </div>
+        <div class="price-item">
+          <span class="price-label">Real-time Price</span>
+          <span class="price-value" :class="{ 'price-up': realTimePrice > data.current_price, 'price-down': realTimePrice < data.current_price }">
+            {{ fmt(realTimePrice) }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- Trading Thesis -->
@@ -178,6 +227,13 @@ function fmt(n) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.meta-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .meta-row {
@@ -193,8 +249,42 @@ function fmt(n) {
 }
 
 .meta-time {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
+}
+
+.meta-prices {
+  display: flex;
+  gap: 24px;
+}
+
+.price-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.price-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.price-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  transition: color 0.3s ease;
+}
+
+.price-up {
+  color: var(--green);
+}
+
+.price-down {
+  color: var(--red);
 }
 
 /* Thesis */
