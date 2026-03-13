@@ -105,6 +105,7 @@ class AnalysisResponse(BaseModel):
     market: str
     mode: str
     timestamp: datetime
+    current_price: float = Field(..., description="The price at the time of analysis")
     analysis: TradingAnalysis | None = Field(
         None, description="LLM-generated trading advice. None if LLM failed."
     )

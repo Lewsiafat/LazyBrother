@@ -6,7 +6,7 @@
 
 **LazyBrother** 透過分析加密貨幣的 K 線圖 (Candlestick charts)，結合傳統型態識別、技術指標、聰明錢概念 (Smart Money Concepts, SMC)，並利用 LLM 產生結構化的投資建議。
 
-**目前版本**：`v0.4.0`
+**目前版本**：`v0.5.0`
 
 ### 核心功能
 

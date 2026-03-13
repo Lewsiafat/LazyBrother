@@ -75,6 +75,14 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
     # Step 5: LLM synthesis
     logger.info("Synthesizing analysis with LLM...")
 
+    # Extract current price from the lowest timeframe's last candle
+    current_price = 0.0
+    if candles:
+        # Lowest timeframe is the first one in the preset list (e.g., "1m" for scalping)
+        lowest_tf = timeframes[0]
+        if lowest_tf in candles and not candles[lowest_tf].empty:
+            current_price = float(candles[lowest_tf].iloc[-1]["close"])
+
     # Build custom instructions from saved snippets + inline prompt
     custom_parts: list[str] = []
     if request.prompt_ids:
@@ -105,6 +113,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
         market="crypto",
         mode=request.mode.value,
         timestamp=datetime.now(timezone.utc),
+        current_price=current_price,
         analysis=trading_analysis,
         details=AnalysisDetails(
             patterns_detected=all_patterns,
