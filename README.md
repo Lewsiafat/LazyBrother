@@ -2,7 +2,7 @@
 
 > Your lazy brother who still gives you solid trading advice.
 
-**LazyBrother** (`v0.4.0`) is a backend service that analyzes candlestick charts for **cryptocurrency**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice.
+**LazyBrother** (`v0.6.0`) is a backend service that analyzes candlestick charts for **cryptocurrency**, combining classical pattern recognition, technical indicators, Smart Money Concepts (SMC), and LLM-powered reasoning to produce structured investment advice — with a built-in backtesting system to validate signal quality.
 
 ## Features
 
@@ -15,6 +15,8 @@
 - 🔀 **Multi-Timeframe** — Scalping (1m/5m/15m) and Swing (15m/1h/4h) modes
 - 🔌 **Multi-Provider** — OpenAI, Google Gemini, or Anthropic Claude
 - 🖥️ **Debug Frontend** — Vue 3 visual client for testing the API with structured result cards
+- 📸 **Snapshot & Backtest** — Save analysis results and validate signals with walk-forward backtesting
+- 🚀 **One-Command Start** — `./start.sh` launches backend and frontend together
 
 ## Quick Start
 
@@ -31,10 +33,16 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-### 3. Run the backend
+### 3. Run everything
 
 ```bash
-uv run uvicorn app.main:app --reload
+./start.sh   # starts backend + frontend together
+```
+
+Or run separately:
+
+```bash
+uv run uvicorn app.main:app --reload   # backend only
 ```
 
 ### 4. Run the debug frontend (optional)
@@ -88,6 +96,23 @@ Returns service health status.
 ### `GET / POST / PUT / DELETE /api/v1/prompts`
 
 CRUD endpoints for managing saved custom prompt snippets. Support importing `.md` files.
+
+### `GET / POST / DELETE /api/v1/snapshots`
+
+Save, list, and delete analysis snapshots for backtesting.
+
+## Backtesting
+
+```bash
+# Walk-forward backtest (rule-based, no LLM)
+uv run python backtest_run.py --symbol BTCUSDT --mode swing --start 2024-01-01 --end 2024-12-31
+
+# Backtest saved LLM snapshots
+uv run python backtest_run.py --from-snapshots
+
+# Dump LLM prompts at each signal point
+uv run python backtest_run.py --symbol BTCUSDT --mode swing --start 2024-01-01 --end 2024-01-31 --dump-prompts
+```
 
 ## Configuration
 
