@@ -106,6 +106,35 @@ export async function deletePrompt(id) {
     return res.json()
 }
 
+/**
+ * Snapshot APIs — save analysis results for backtesting
+ */
+
+export async function saveSnapshot(analysisResult, label = null) {
+    const res = await fetch(`${getBaseUrl()}/api/v1/snapshots`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label, data: analysisResult }),
+    })
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail || `Failed to save snapshot (${res.status})`)
+    }
+    return res.json()
+}
+
+export async function listSnapshots() {
+    const res = await fetch(`${getBaseUrl()}/api/v1/snapshots`)
+    if (!res.ok) throw new Error('Failed to load snapshots')
+    return res.json()
+}
+
+export async function deleteSnapshot(id) {
+    const res = await fetch(`${getBaseUrl()}/api/v1/snapshots/${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Failed to delete snapshot')
+    return res.json()
+}
+
 export async function importPromptMarkdown(file) {
     const formData = new FormData()
     formData.append('file', file)

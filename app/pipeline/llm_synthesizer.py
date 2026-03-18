@@ -121,10 +121,11 @@ async def synthesize_analysis(
     indicators: dict[str, IndicatorData],
     smc_data: dict[str, SMCData],
     custom_instructions: str | None = None,
-) -> TradingAnalysis | None:
+) -> tuple[TradingAnalysis | None, str]:
     """Build prompt, call LLM, parse response into TradingAnalysis.
 
-    Returns None if the LLM call fails (caller should return raw data as fallback).
+    Returns:
+        (TradingAnalysis | None, prompt_str) — analysis is None if LLM fails.
     """
     prompt = _build_prompt(
         symbol, market, mode, timeframes, patterns, indicators, smc_data,
@@ -138,7 +139,7 @@ async def synthesize_analysis(
         # Parse JSON response
         data = json.loads(raw_response)
 
-        return TradingAnalysis(
+        analysis = TradingAnalysis(
             trading_thesis=data["trading_thesis"],
             confidence_level=data["confidence_level"],
             confidence_reason=data["confidence_reason"],
@@ -149,13 +150,14 @@ async def synthesize_analysis(
                 TakeProfitTarget(**tp) for tp in data["take_profit_targets"]
             ],
         )
+        return analysis, prompt
 
     except json.JSONDecodeError as e:
         logger.error("Failed to parse LLM response as JSON: %s", e)
-        return None
+        return None, prompt
     except KeyError as e:
         logger.error("Missing expected field in LLM response: %s", e)
-        return None
+        return None, prompt
     except Exception as e:
         logger.error("LLM synthesis failed: %s", e)
-        return None
+        return None, prompt

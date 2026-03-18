@@ -1,0 +1,368 @@
+[
+  {
+    "id": "8a8a6eda-8e36-4055-9a4e-4b63d6d0c641",
+    "saved_at": "2026-03-18T17:14:08.257042",
+    "label": null,
+    "data": {
+      "symbol": "BTCUSDT",
+      "market": "crypto",
+      "mode": "scalping",
+      "timestamp": "2026-03-18T09:14:03.543491Z",
+      "current_price": 74168.99,
+      "analysis": {
+        "trading_thesis": "BTCUSDT shows strong short-term bullish momentum with 'three white soldiers' on both 1m and 5m timeframes, supported by a bullish BOS on the 1m chart. While 15m MACD is lagging, the 1m and 5m RSI and MACD indicate sustained buying pressure, suggesting a continuation toward the upper Bollinger Band.",
+        "confidence_level": "medium",
+        "confidence_reason": "The short-term momentum is clearly bullish, but the 15m MACD histogram is negative, indicating potential resistance at higher levels that could limit upside.",
+        "direction": "long",
+        "entry_zone": {
+          "low": 74042.85,
+          "high": 74052.71
+        },
+        "stop_loss": {
+          "price": 73970.0,
+          "reason": "Placed below the 5m bullish order block and the 1m structural support zone to invalidate the bullish thesis."
+        },
+        "take_profit_targets": [
+          {
+            "label": "TP1",
+            "price": 74123.12,
+            "reason": "Targeting the 1m bearish order block resistance."
+          },
+          {
+            "label": "TP2",
+            "price": 74160.0,
+            "reason": "Aligned with the 5m bearish FVG and 15m bearish order block entry."
+          },
+          {
+            "label": "TP3",
+            "price": 74250.0,
+            "reason": "Upper 5m Bollinger Band and 15m bullish order block liquidity zone."
+          }
+        ]
+      },
+      "details": {
+        "patterns_detected": [
+          "three_white_soldiers",
+          "spinning_top"
+        ],
+        "indicators": {
+          "rsi_14": 53.22,
+          "macd": {
+            "value": -44.57,
+            "signal": 20.57,
+            "histogram": -65.14
+          },
+          "bollinger": {
+            "upper": 74338.52,
+            "middle": 74050.91,
+            "lower": 73763.3
+          },
+          "sma_20": 74050.91,
+          "ema_50": 74141.1
+        },
+        "smc": {
+          "order_blocks": [
+            {
+              "type": "bullish",
+              "zone": [
+                73971.64,
+                74006.74
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74022.81,
+                74042.51
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74042.85,
+                74052.71
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74016.21,
+                74072.92
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74024.58,
+                74046.0
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74100.0,
+                74123.12
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73867.56,
+                73912.4
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73934.73,
+                74035.17
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73970.0,
+                74054.1
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74021.26,
+                74082.45
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74033.07,
+                74087.85
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73847.05,
+                73931.94
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74137.02,
+                74262.2
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73830.76,
+                74060.0
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74022.69,
+                74130.02
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73828.0,
+                74063.22
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74161.77,
+                74312.11
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73860.01,
+                73997.04
+              ],
+              "timeframe": "15m"
+            }
+          ],
+          "fair_value_gaps": [
+            {
+              "type": "bullish",
+              "zone": [
+                74115.41,
+                74116.84
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74149.45,
+                74149.99
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74149.99,
+                74162.9
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74095.44,
+                74100.0
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74042.51,
+                74095.43
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74044.9,
+                74048.17
+              ],
+              "timeframe": "1m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73912.4,
+                73934.73
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74057.76,
+                74094.71
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74111.29,
+                74123.17
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74150.0,
+                74164.96
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74106.06,
+                74160.0
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73992.79,
+                74033.07
+              ],
+              "timeframe": "5m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                74399.7,
+                74446.4
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73847.08,
+                73863.31
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bullish",
+              "zone": [
+                73912.4,
+                73970.0
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                74150.0,
+                74161.77
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73997.04,
+                74006.02
+              ],
+              "timeframe": "15m"
+            },
+            {
+              "type": "bearish",
+              "zone": [
+                73847.08,
+                73860.01
+              ],
+              "timeframe": "15m"
+            }
+          ],
+          "structure": "BOS_bullish",
+          "liquidity_sweeps": []
+        },
+        "timeframes_analyzed": [
+          "1m",
+          "5m",
+          "15m"
+        ]
+      },
+      "prompt": "Analyze the following market data for BTCUSDT (crypto) in scalping mode.\nTimeframes analyzed: 1m, 5m, 15m\n\n## Candlestick Patterns Detected\n  [1m]: three_white_soldiers\n  [5m]: three_white_soldiers, spinning_top\n\n## Technical Indicators\n  [1m]: {\"rsi_14\": 67.35, \"macd\": {\"value\": 27.95, \"signal\": 7.99, \"histogram\": 19.95}, \"bollinger\": {\"upper\": 74185.84, \"middle\": 74090.85, \"lower\": 73995.85}, \"sma_20\": 74090.85, \"ema_50\": 74067.7}\n  [5m]: {\"rsi_14\": 63.07, \"macd\": {\"value\": 37.74, \"signal\": 22.12, \"histogram\": 15.63}, \"bollinger\": {\"upper\": 74250.7, \"middle\": 73996.75, \"lower\": 73742.81}, \"sma_20\": 73996.75, \"ema_50\": 74051.92}\n  [15m]: {\"rsi_14\": 53.22, \"macd\": {\"value\": -44.57, \"signal\": 20.57, \"histogram\": -65.14}, \"bollinger\": {\"upper\": 74338.52, \"middle\": 74050.91, \"lower\": 73763.3}, \"sma_20\": 74050.91, \"ema_50\": 74141.1}\n\n## Smart Money Concepts (SMC)\n  [1m]: {\"order_blocks\": [{\"type\": \"bullish\", \"zone\": [73971.64, 74006.74], \"timeframe\": \"1m\"}, {\"type\": \"bullish\", \"zone\": [74022.81, 74042.51], \"timeframe\": \"1m\"}, {\"type\": \"bullish\", \"zone\": [74042.85, 74052.71], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74016.21, 74072.92], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74024.58, 74046.0], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74100.0, 74123.12], \"timeframe\": \"1m\"}], \"fair_value_gaps\": [{\"type\": \"bullish\", \"zone\": [74115.41, 74116.84], \"timeframe\": \"1m\"}, {\"type\": \"bullish\", \"zone\": [74149.45, 74149.99], \"timeframe\": \"1m\"}, {\"type\": \"bullish\", \"zone\": [74149.99, 74162.9], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74095.44, 74100.0], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74042.51, 74095.43], \"timeframe\": \"1m\"}, {\"type\": \"bearish\", \"zone\": [74044.9, 74048.17], \"timeframe\": \"1m\"}], \"structure\": \"BOS_bullish\"}\n  [5m]: {\"order_blocks\": [{\"type\": \"bullish\", \"zone\": [73867.56, 73912.4], \"timeframe\": \"5m\"}, {\"type\": \"bullish\", \"zone\": [73934.73, 74035.17], \"timeframe\": \"5m\"}, {\"type\": \"bullish\", \"zone\": [73970.0, 74054.1], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [74021.26, 74082.45], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [74033.07, 74087.85], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [73847.05, 73931.94], \"timeframe\": \"5m\"}], \"fair_value_gaps\": [{\"type\": \"bullish\", \"zone\": [73912.4, 73934.73], \"timeframe\": \"5m\"}, {\"type\": \"bullish\", \"zone\": [74057.76, 74094.71], \"timeframe\": \"5m\"}, {\"type\": \"bullish\", \"zone\": [74111.29, 74123.17], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [74150.0, 74164.96], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [74106.06, 74160.0], \"timeframe\": \"5m\"}, {\"type\": \"bearish\", \"zone\": [73992.79, 74033.07], \"timeframe\": \"5m\"}]}\n  [15m]: {\"order_blocks\": [{\"type\": \"bullish\", \"zone\": [74137.02, 74262.2], \"timeframe\": \"15m\"}, {\"type\": \"bullish\", \"zone\": [73830.76, 74060.0], \"timeframe\": \"15m\"}, {\"type\": \"bullish\", \"zone\": [74022.69, 74130.02], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [73828.0, 74063.22], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [74161.77, 74312.11], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [73860.01, 73997.04], \"timeframe\": \"15m\"}], \"fair_value_gaps\": [{\"type\": \"bullish\", \"zone\": [74399.7, 74446.4], \"timeframe\": \"15m\"}, {\"type\": \"bullish\", \"zone\": [73847.08, 73863.31], \"timeframe\": \"15m\"}, {\"type\": \"bullish\", \"zone\": [73912.4, 73970.0], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [74150.0, 74161.77], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [73997.04, 74006.02], \"timeframe\": \"15m\"}, {\"type\": \"bearish\", \"zone\": [73847.08, 73860.01], \"timeframe\": \"15m\"}]}\n\n---\n\nBased on the above multi-timeframe analysis, provide your trading advice as a JSON object with EXACTLY these fields:\n\n{\n  \"trading_thesis\": \"Brief summary of core reason for your recommendation (1-3 sentences)\",\n  \"confidence_level\": \"high\" | \"medium\" | \"low\",\n  \"confidence_reason\": \"Why this confidence level (1-2 sentences)\",\n  \"direction\": \"long\" | \"short\",\n  \"entry_zone\": { \"low\": <number>, \"high\": <number> },\n  \"stop_loss\": { \"price\": <number>, \"reason\": \"Why here (reference key levels)\" },\n  \"take_profit_targets\": [\n    { \"label\": \"TP1\", \"price\": <number>, \"reason\": \"Based on...\" },\n    { \"label\": \"TP2\", \"price\": <number>, \"reason\": \"Based on...\" },\n    { \"label\": \"TP3\", \"price\": <number>, \"reason\": \"Based on...\" }\n  ]\n}\n\nRequirements:\n- Use actual price levels from the data\n- Reference specific patterns, indicators, and SMC levels in your reasoning\n- Set stop-loss below/above key structural levels (order blocks, swing points)\n- Take-profit targets should be based on FVGs, resistance/support, and Fibonacci levels\n- Return ONLY the JSON object, no other text\n"
+    }
+  }
+]

@@ -93,7 +93,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
         custom_parts.append(request.custom_prompt)
     custom_instructions = "\n\n".join(custom_parts) if custom_parts else None
 
-    trading_analysis = await synthesize_analysis(
+    trading_analysis, prompt = await synthesize_analysis(
         symbol=request.symbol,
         market="crypto",
         mode=request.mode.value,
@@ -121,6 +121,7 @@ async def analyze(request: AnalysisRequest) -> AnalysisResponse:
             smc=merged_smc,
             timeframes_analyzed=timeframes,
         ),
+        prompt=prompt,
     )
 
 
