@@ -1,9 +1,29 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { saveSnapshot } from '../api.js'
 
 const props = defineProps({
   data: { type: Object, required: true },
 })
+
+// ── Snapshot save ────────────────────────────────────────────────────────────
+const saveState = ref('idle') // 'idle' | 'saving' | 'saved' | 'error'
+const saveError = ref(null)
+
+async function onSave() {
+  if (saveState.value === 'saving') return
+  saveState.value = 'saving'
+  saveError.value = null
+  try {
+    await saveSnapshot(props.data)
+    saveState.value = 'saved'
+    setTimeout(() => { saveState.value = 'idle' }, 3000)
+  } catch (e) {
+    saveError.value = e.message
+    saveState.value = 'error'
+    setTimeout(() => { saveState.value = 'idle' }, 4000)
+  }
+}
 
 const analysis = computed(() => props.data.analysis)
 const details = computed(() => props.data.details)
@@ -60,18 +80,33 @@ function fmt(n) {
         </div>
         <div class="meta-time">{{ new Date(data.timestamp).toLocaleString() }}</div>
       </div>
-      
-      <div class="meta-prices">
-        <div class="price-item">
-          <span class="price-label">Analysis Price</span>
-          <span class="price-value">{{ fmt(data.current_price) }}</span>
+
+      <div class="meta-right">
+        <div class="meta-prices">
+          <div class="price-item">
+            <span class="price-label">Analysis Price</span>
+            <span class="price-value">{{ fmt(data.current_price) }}</span>
+          </div>
+          <div class="price-item">
+            <span class="price-label">Real-time Price</span>
+            <span class="price-value" :class="{ 'price-up': realTimePrice > data.current_price, 'price-down': realTimePrice < data.current_price }">
+              {{ fmt(realTimePrice) }}
+            </span>
+          </div>
         </div>
-        <div class="price-item">
-          <span class="price-label">Real-time Price</span>
-          <span class="price-value" :class="{ 'price-up': realTimePrice > data.current_price, 'price-down': realTimePrice < data.current_price }">
-            {{ fmt(realTimePrice) }}
-          </span>
-        </div>
+
+        <button
+          v-if="data.analysis"
+          class="save-btn"
+          :class="`save-btn--${saveState}`"
+          :disabled="saveState === 'saving'"
+          @click="onSave"
+        >
+          <span v-if="saveState === 'idle'">💾 Save Snapshot</span>
+          <span v-else-if="saveState === 'saving'">Saving…</span>
+          <span v-else-if="saveState === 'saved'">✓ Saved</span>
+          <span v-else-if="saveState === 'error'" :title="saveError">✗ Failed</span>
+        </button>
       </div>
     </div>
 
@@ -236,6 +271,13 @@ function fmt(n) {
   gap: 4px;
 }
 
+.meta-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .meta-row {
   display: flex;
   align-items: center;
@@ -256,6 +298,43 @@ function fmt(n) {
 .meta-prices {
   display: flex;
   gap: 24px;
+}
+
+/* Save button */
+.save-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.save-btn--saved {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.save-btn--error {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .price-item {

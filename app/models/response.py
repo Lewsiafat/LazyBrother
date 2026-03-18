@@ -110,3 +110,6 @@ class AnalysisResponse(BaseModel):
         None, description="LLM-generated trading advice. None if LLM failed."
     )
     details: AnalysisDetails
+    prompt: str | None = Field(
+        None, description="The prompt sent to the LLM. Included for snapshot/backtest use."
+    )

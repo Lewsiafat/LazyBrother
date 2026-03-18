@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routers.analysis import router as analysis_router
 from app.routers.prompts import router as prompts_router
+from app.routers.snapshots import router as snapshots_router
 
 # Configure logging
 logging.basicConfig(
@@ -37,6 +38,7 @@ app.add_middleware(
 # Register routers
 app.include_router(analysis_router)
 app.include_router(prompts_router)
+app.include_router(snapshots_router)
 
 
 @app.get("/")
